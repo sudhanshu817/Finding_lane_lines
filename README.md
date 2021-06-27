@@ -58,4 +58,4 @@ A possible improvement would be to have a more robust approach which discards th
 
 ## Sample output from the pipeline on a real video
 
-![Sample results on a video][video1]
+![Sample results on a video](https://github.com/sudhanshu817/Finding_lane_lines/blob/master/gif_output/ezgif.com-gif-maker.gif)
