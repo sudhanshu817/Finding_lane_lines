@@ -40,7 +40,7 @@ The output from hough transform contained multiple lines. After getting the edge
 
 Sample output using the above pipeline:
 
-![alt text][image1]
+![Lanes detected in a image][image1]
 
 
 ### 2. Identify potential shortcomings with your current pipeline

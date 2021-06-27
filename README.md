@@ -6,51 +6,56 @@
 Overview
 ---
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
-
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
-
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
-
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm. This project repo detects lanes from images.
 
 
-Creating a Great Writeup
+
+
+
+[//]: # (Image References)
+
+[image1]: ./test_images_output/solidWhiteCurve.jpg
+
+[video1]: ./test_videos_output/solidWhiteRight.mp4
+
 ---
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
+### 1. The project pipeline
 
-1. Describe the pipeline
+The pipeline for detecting lane lines includes 5 steps:
+* Convert the image to grayscale
+* Apply gaussian blur filter to the image inorder to smooth it
+* Do canny edge detection on the smooth image
+* Mask the canny edges output to only get the edges in the region of interest
+* Apply hough transform to the masked image
+* Get two lines for each lane from the hough transform results
 
-2. Identify any shortcomings
+The output from hough transform contained multiple lines. After getting the edges from the hough transform, the goal was to have two single lines for each lanes. To do this I modified the draw_lines() funcction in the following way:
+* Discard all the lines with a slope between (0.2, -0.2) as these are the lines which are perpendicular to the lanes. Also discard lines with infinite slope
+* Divide the lines into two parts, one with positive slope and the other with negative slope
+* For every line in both the group, calculate the slope and the intercept of the line in the form (y = m*x + c)
+* Discard the lines which which are outliers from both the group using 2 standard deviation as the threshold
+* Get the mean slope and mean intercept for both the groups, so that we have one line representing each group
+* Draw these lines on the image
 
-3. Suggest possible improvements
+Sample output using the above pipeline:
 
-We encourage using images in your writeup to demonstrate how your pipeline works.  
-
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+![Output from the pipeline on a image][image1]
 
 
-The Project
----
+### 2. Shortcomings with current pipeline
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://classroom.udacity.com/nanodegrees/nd013/parts/fbf77062-5703-404e-b60c-95b78b2f3f9e/modules/83ec35ee-1e02-48a5-bdb7-d244bd47c2dc/lessons/8c82408b-a217-4d09-b81d-1bda4c6380ef/concepts/4f1870e0-3849-43e4-b670-12e6f2d4b7a7) if you haven't already.
+One potential shortcoming would be, if the road has multiple objects which are aligned in the direction of lanes and is a part of the region of interest, then the pipeline might detect them as lane lines. (eg: The edge of the road) As you can see in the last output video, in some frames the divider at the edge of road is detected as lane line.
 
-**Step 2:** Open the code in a Jupyter Notebook
+Another shortcoming could be if the lane lines don't fall in the region of interest due to a change in alignment of the camera, the pipeline would not detect any lines.
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out <A HREF="https://www.packtpub.com/books/content/basics-jupyter-notebook-and-python" target="_blank">Cyrille Rossant's Basics of Jupyter Notebook and Python</A> to get started.
+Another short coming would be road patches with very sharp turn.
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
 
-`> jupyter notebook`
+### 3. Possible improvements to the pipeline
 
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
+A possible improvement would be to have a more robust approach which discards the other edges being detceted by only keeping the two lines which don't have any other line between them and also have slopes in opposite direction, one positive and the other negative.
 
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
+## Sample output from the pipeline on a real video
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+![Sample results on a video][video1]
